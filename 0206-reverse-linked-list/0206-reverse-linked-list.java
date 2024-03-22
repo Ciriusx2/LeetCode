@@ -10,17 +10,16 @@
  */
 class Solution {
     public ListNode reverseList(ListNode head) {
-        return reverseSolve(head);
+        return reverseHelp(head, null);
     }
 
-    private ListNode reverseSolve(ListNode head) {
-        if (head == null || head.next == null)
-            return head;
+    private ListNode reverseHelp(ListNode head, ListNode prev) {
+        if (head == null)
+            return prev;
 
-        ListNode last = reverseSolve(head.next);
-        head.next.next = head;
-        head.next = null;
+        ListNode temp = head.next;
+        head.next = prev;
 
-        return last;
+        return reverseHelp(temp, head);
     }
 }
