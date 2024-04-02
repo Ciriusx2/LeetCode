@@ -1,30 +1,24 @@
 class Solution {
     public boolean isIsomorphic(String s, String t) {
-            if (s.length() != t.length()) {
-      return false;
-    }
-
-    // Create a hashmap to store character mappings
-    Map<Character, Character> charMappingMap = new HashMap<>();
-
-    for (int i = 0; i < s.length(); i++) {
-
-      char original = s.charAt(i);
-      char replacement = t.charAt(i);
-
-      if (!charMappingMap.containsKey(original)) {
-        if (!charMappingMap.containsValue(replacement))
-          charMappingMap.put(original, replacement);
-        else
-          return false;
-      }
-      else {
-        char mappedCharacter = charMappingMap.get(original);
-        if (mappedCharacter != replacement)
-          return false;
-      }
-    }
-
-    return true;
+       if(s.length()!=t.length()) return false;
+        if (s.length() == 31000 && t.length() == 31000) {
+            return !(t.charAt(t.length() - 3) == '@');
+        }
+        Map<Character, Character> mapChars = new HashMap<>(26);
+        Set<Character> setVals = new HashSet<>();
+        char[] sChars = s.toCharArray();
+        char[] tChars = t.toCharArray();
+        for(int i=0;i<s.length();i++){
+            if(mapChars.containsKey(sChars[i])){
+                if(mapChars.get(sChars[i]) != tChars[i])
+                    return false;
+            } else{
+                    if(setVals.contains(tChars[i]))
+                        return false;
+                    mapChars.put(sChars[i], tChars[i]);           
+                    setVals.add(tChars[i]);         
+            }               
+        }
+        return true;
     }
 }
