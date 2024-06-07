@@ -1,53 +1,53 @@
 class Solution {
-    Trie root;
-    public String replaceWords(List<String> dictionary, String sentence) {
-        root = new Trie();
-        for(String word : dictionary){
-            insert(word);
-        }
-        StringBuilder result = new StringBuilder();
-        String []  input = sentence.split(" ");
-        for(String i : input){
-            result.append(search(i));
-            result.append(" ");
-        }
-        return result.toString().trim();
+    static class Node {
+        boolean isWord;
+        Node[] children = new Node[26];
     }
-    public String search(String word){
-        Trie node = root;
-        int j = 0;
-        for(char c : word.toCharArray()){
-            int i = c - 'a';
-            j++;
-            if(node.children[i] == null){
-                return word;
-            }else if(node.children[i].isEnd){
-                return word.substring(0, j);
-            }else{
-                node = node.children[i];
-            }
-            
-        }
-        return word;
 
-    }
-    public void insert(String word){
-        Trie node = root;
-        for(char c: word.toCharArray()){
-            int i = c - 'a';
-            if(node.children[i] == null){
-                node.children[i] = new Trie();
-            }
-            node = node.children[i];
+    Node root = new Node();
+    public String replaceWords(List<String> dictionary, String sentence) {
+        for (String str: dictionary) {
+            insert(str);
         }
-        node.isEnd = true;
+        
+        String[] arr = sentence.split(" ");
+        StringBuilder builder = new StringBuilder("");
+        for (int i=0; i<arr.length; i++) {
+            String replace = search(arr[i]);
+            if (replace == "") {
+                builder.append(arr[i]);
+            } else {
+                builder.append(replace);
+            }
+            builder.append(" ");
+        }
+        return builder.toString().trim();
     }
-}
-class Trie{
-    Trie [] children;
-    boolean isEnd;
-    public Trie(){
-        children = new Trie[26];
-        isEnd =false;
+
+    public void insert(String str) {
+        Node node = this.root;
+        for (char c: str.toCharArray()) {
+            int n = c-'a';
+            if (node.children[n] == null) {
+                node.children[n] = new Node();
+            }
+            node = node.children[n];
+        }
+        node.isWord = true;
+    }
+
+
+    public String search(String str) {
+        Node node = this.root;
+        for (int i=0; i<str.length(); i++) {
+            char c = str.charAt(i);
+            int n = c-'a';
+            if (node.children[n] == null) {
+                return "";
+            }
+            node = node.children[n];
+            if (node.isWord) return str.substring(0, i+1);
+        }
+        return "";
     }
 }
