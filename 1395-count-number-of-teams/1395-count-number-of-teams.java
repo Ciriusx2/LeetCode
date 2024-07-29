@@ -2,75 +2,53 @@ class Solution {
     public int numTeams(int[] rating) {
         int n = rating.length;
         if (n < 3) return 0;
-        
-        // Create a list of soldiers with their ratings and indices
-        List<Soldier> soldiers = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            soldiers.add(new Soldier(rating[i], i));
+
+        int min = Integer.MAX_VALUE, max = Integer.MIN_VALUE;
+        for (int num : rating) {
+            min = Math.min(min, num);
+            max = Math.max(max, num);
         }
         
-        // Sort soldiers by rating
-        Collections.sort(soldiers);
+        int[] leftTree = new int[max - min + 2];
+        int[] rightTree = new int[max - min + 2];
         
-        int[] indexMap = new int[n];
-        for (int i = 0; i < n; i++) {
-            indexMap[soldiers.get(i).index] = i;
+        for (int num : rating) {
+            update(rightTree, num - min, 1);
         }
         
-        int teams = 0;
+        int count = 0;
+        for (int i = 0; i < n; i++) {
+            update(rightTree, rating[i] - min, -1);
+            
+            int lessLeft = query(leftTree, rating[i] - min - 1);
+            int greaterLeft = i - lessLeft;
+            
+            int lessRight = query(rightTree, rating[i] - min - 1);
+            int greaterRight = (n - i - 1) - lessRight;
+            
+            count += lessLeft * greaterRight + greaterLeft * lessRight;
+            
+            update(leftTree, rating[i] - min, 1);
+        }
         
-        // Count ascending teams
-        teams += countTeams(indexMap, n, true);
-        
-        // Count descending teams
-        teams += countTeams(indexMap, n, false);
-        
-        return teams;
+        return count;
     }
-    
-    private int countTeams(int[] indexMap, int n, boolean ascending) {
-        int[] bit = new int[n + 1];
-        int teams = 0;
-        
-        for (int i = 0; i < n; i++) {
-            int rank = indexMap[i] + 1;
-            int left = ascending ? getSum(bit, rank - 1) : getSum(bit, n) - getSum(bit, rank);
-            int right = ascending ? n - rank - (getSum(bit, n) - getSum(bit, rank)) : rank - 1 - getSum(bit, rank - 1);
-            teams += left * right;
-            update(bit, rank, 1);
-        }
-        
-        return teams;
-    }
-    
-    private void update(int[] bit, int index, int val) {
-        while (index < bit.length) {
-            bit[index] += val;
+
+    private void update(int[] tree, int index, int value) {
+        index++;
+        while (index < tree.length) {
+            tree[index] += value;
             index += index & (-index);
         }
     }
-    
-    private int getSum(int[] bit, int index) {
+
+    private int query(int[] tree, int index) {
         int sum = 0;
+        index++;
         while (index > 0) {
-            sum += bit[index];
+            sum += tree[index];
             index -= index & (-index);
         }
         return sum;
-    }
-    
-    private class Soldier implements Comparable<Soldier> {
-        int rating;
-        int index;
-        
-        Soldier(int rating, int index) {
-            this.rating = rating;
-            this.index = index;
-        }
-        
-        @Override
-        public int compareTo(Soldier other) {
-            return Integer.compare(this.rating, other.rating);
-        }
     }
 }
