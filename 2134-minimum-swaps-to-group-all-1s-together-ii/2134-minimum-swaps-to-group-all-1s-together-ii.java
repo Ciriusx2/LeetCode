@@ -1,32 +1,21 @@
 class Solution {
-    public int minSwaps(int[] a) {
-	int windowSize = 0;
-	for(int x : a){
-		windowSize = x == 1 ? windowSize+1 : windowSize; 
-	} 
-	if (windowSize ==a.length)return 0;
-
-	int back= 0 ;int front=windowSize - 1 ;
-	int initialCount =0;
-	for(int i =0 ; i<= front; i++){
-	   if(a[i]==0) initialCount++;
-	}
-	back++;
-	front++; 
-	int ans = initialCount;
-	while(back<a.length){
-		 if(front==a.length)front=0;
-		initialCount = giveMeCounts(a,back,front,initialCount);
-		 ans = Math.min(ans , initialCount);
-		back++; front++;
-	}
-	return ans;
-}  
-public int giveMeCounts(int []a , int b, int f,int initialCount){
-
-	initialCount = a[b-1]==0 ? initialCount - 1 :initialCount;
-	initialCount = a[f]== 0 ? initialCount+1:initialCount;
-   //  System.out.println(b + " "+ f + "-" + initialCount);
-	 return initialCount;
-}
+    public int minSwaps(int[] nums) {
+        int k=0;
+        for(int i=0;i<nums.length;i++){
+            k+=nums[i];
+        }
+        int sum=0; int min=nums.length;
+        for(int j=0;j<nums.length;j++){
+            sum+=nums[j];
+            if(j>=k){sum-=nums[j-k];}
+            if(j>=k-1)min=Math.min(min,k-sum);
+        }
+        for(int i=0;i<=k-2;i++){
+            //length-k,...,length-1
+            //length-k+1 - 0; length-k+2 - 1; length-k+3 - 2;
+            sum=sum+nums[i]-nums[nums.length-k+i];
+            min=Math.min(min,k-sum);
+        }
+        return min;
+    }
 }
