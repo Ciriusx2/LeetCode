@@ -1,51 +1,59 @@
-import java.util.*;
+import java.util.AbstractMap;
+import java.util.Map;
 
-public class Solution {
+class Solution {
+    long largestSubArraySumPossible = 0, smallestSubArraySumPossible = 0;
 
-    private static final int MOD = 1000000007;
+    public Map.Entry<Integer, Long> subArraysWithSumLessThanOrEqualTo(int[] nums, long target){
+
+        int countOfSuchSubArrays = 0;
+        long totalSum = 0;
+        long windowSum = 0;
+        long currSum = 0;
+        int n = nums.length;
+
+        for (int left = 0, right = 0; right < n; ++right) {
+            currSum += (long) nums[right] * (right - left + 1);
+            windowSum += nums[right]; 
+            while (windowSum > target) {
+                currSum -= windowSum;
+                windowSum -= nums[left++];
+            }
+            countOfSuchSubArrays += right - left + 1;
+            totalSum += currSum;
+        }
+        return new AbstractMap.SimpleEntry<>(Integer.valueOf(countOfSuchSubArrays), Long.valueOf(totalSum));
+    }
+
+    public long firstKSubarraysSum(int[] nums, int k){
+        long start = smallestSubArraySumPossible, end = largestSubArraySumPossible;
+        while (start < end) {
+            long mid = start + (end - start) / 2;
+            if (subArraysWithSumLessThanOrEqualTo(nums, mid).getKey() < k) {
+                start = mid + 1;
+            } else {
+                end = mid;
+            }
+        }
+        Map.Entry<Integer, Long> map = subArraysWithSumLessThanOrEqualTo(nums, start);
+        long totalOfFirstKSubarraysSum = map.getValue();
+        int countOfSuchSubArrs = map.getKey();
+        return totalOfFirstKSubarraysSum - start * (countOfSuchSubArrs - k);
+    }
 
     public int rangeSum(int[] nums, int n, int left, int right) {
-        long result =
-            (sumOfFirstK(nums, n, right) - sumOfFirstK(nums, n, left - 1)) %
-            MOD;
-        // Ensure non-negative result
-        return (int) ((result + MOD) % MOD);
-    }
+        int mod = (int) 1e9 + 7;
+        long ans = 0;
+        smallestSubArraySumPossible = nums[0];
 
-    // Helper function to count subarrays with sum <= target and their total sum.
-    private Map.Entry<Integer, Long> countAndSum(
-        int[] nums,
-        int n,
-        int target
-    ) {
-        int count = 0;
-        long currentSum = 0, totalSum = 0, windowSum = 0;
-        for (int j = 0, i = 0; j < n; ++j) {
-            currentSum += nums[j];
-            windowSum += nums[j] * (j - i + 1);
-            while (currentSum > target) {
-                windowSum -= currentSum;
-                currentSum -= nums[i++];
-            }
-            count += j - i + 1;
-            totalSum += windowSum;
+        for (int i = 0; i < n; i++) {
+            largestSubArraySumPossible += nums[i];
+            smallestSubArraySumPossible = Math.min(smallestSubArraySumPossible, nums[i]);
         }
-        return new AbstractMap.SimpleEntry<>(count, totalSum);
-    }
 
-    // Helper function to find the sum of the first k smallest subarray sums.
-    private long sumOfFirstK(int[] nums, int n, int k) {
-        int minSum = Arrays.stream(nums).min().getAsInt();
-        int maxSum = Arrays.stream(nums).sum();
-        int left = minSum, right = maxSum;
+        ans = firstKSubarraysSum(nums, right) % mod; 
+        ans -= firstKSubarraysSum(nums, left - 1) % mod;
 
-        while (left <= right) {
-            int mid = left + (right - left) / 2;
-            if (countAndSum(nums, n, mid).getKey() >= k) right = mid - 1;
-            else left = mid + 1;
-        }
-        Map.Entry<Integer, Long> result = countAndSum(nums, n, left);
-        // There can be more subarrays with the same sum of left.
-        return result.getValue() - left * (result.getKey() - k);
+        return (int) (ans % mod);
     }
 }
