@@ -1,29 +1,59 @@
 class Solution {
+int minX, minY, maxX, maxY, index;
+
+    int[][] result;
+
     public int[][] spiralMatrixIII(int rows, int cols, int rStart, int cStart) {
-        int[][] directions = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}}; // East, South, West, North
-        int[][] result = new int[rows * cols][2];
-        int steps = 0, d = 0, len = 0;
         
-        result[0] = new int[]{rStart, cStart};
-        int count = 1;
-        
-        while (count < rows * cols) {
-            if (d == 0 || d == 2) steps++; // Increase step size after moving East or West
-            
-            for (int i = 0; i < steps; i++) {
-                rStart += directions[d][0];
-                cStart += directions[d][1];
-                
-                if (rStart >= 0 && rStart < rows && cStart >= 0 && cStart < cols) {
-                    result[count++] = new int[]{rStart, cStart};
-                }
-                
-                if (count == rows * cols) return result;
-            }
-            
-            d = (d + 1) % 4; // Change direction
+        int n = cols * rows;
+        result = new int[n][];
+
+        minX = cStart;
+        maxX = cStart + 1;
+        minY = rStart;
+        maxY = rStart;
+        index = 0;
+        result[index++] = new int[]{rStart, cStart};
+
+        while (true) {
+            if (minY >= 0){
+                right(Math.max(0, minX + 1), Math.min(cols - 1, maxX));
+            } 
+            maxY++;
+            if (index >= n) break;
+
+            if (maxX < cols) down(Math.max(0, minY + 1), Math.min(rows - 1, maxY));
+            minX--;
+            if (index >= n) break;
+
+            if (maxY < rows) left(Math.min(cols - 1, maxX - 1), Math.max(0, minX));
+            minY--;
+            if (index >= n) break;
+
+            if (minX >= 0) up(Math.min(rows - 1, maxY - 1), Math.max(0, minY));
+            maxX++;
+            if (index >= n) break;
         }
-        
         return result;
+    }
+
+    public void right(int start, int end) {
+        for (int i = start; i <= end; i++) 
+            result[index++] = new int[]{minY, i};
+    }
+
+    public void left(int start, int end) {
+        for (int i = start; i >= end; i--) 
+           result[index++] = new int[]{maxY, i};
+    }
+
+    public void down(int start, int end) {
+        for (int i = start; i <= end; i++) 
+            result[index++] = new int[]{i, maxX};
+    }
+
+    public void up(int start, int end) {
+        for (int i = start; i >= end; i--) 
+           result[index++] = new int[]{i, minX};
     }
 }
